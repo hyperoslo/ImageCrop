@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ImageCropper">
+        <attr name="crop_width" format="integer"/>
+        <attr name="crop_height" format="integer"/>
+    </declare-styleable>
+</resources>

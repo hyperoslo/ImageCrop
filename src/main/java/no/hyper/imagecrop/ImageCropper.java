@@ -105,10 +105,15 @@ public class ImageCropper extends View {
             float bottomSide = (top * tempScale) + (picture.getHeight() * tempScale);
             Rect cropSquare = getCropSquare();
 
+            float dx = rightSide - (left + picture.getWidth());
+            float dy = bottomSide - (top + picture.getHeight());
+
             if(left < cropSquare.left && rightSide > cropSquare.right
                     && top < cropSquare.top && bottomSide > cropSquare.bottom) {
                 mScaleFactor *= tempScale;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 10.0f));
+                left -= dx/2;
+                top -= dy/2;
             }
 
             invalidate();

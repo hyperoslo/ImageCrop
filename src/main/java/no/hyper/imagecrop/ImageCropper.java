@@ -23,8 +23,10 @@ public class ImageCropper extends View {
     private Bitmap picture;
     private Paint picturePaint;
     private Paint rectPaint;
+    private Paint rectMask;
     private float cropWidth;
     private float cropHeight;
+    private boolean mask = false;
 
     private float left;
     private float top;
@@ -59,6 +61,10 @@ public class ImageCropper extends View {
         rectPaint = new Paint();
         rectPaint.setColor(Color.WHITE);
         rectPaint.setStyle(Paint.Style.STROKE);
+        rectMask = new Paint();
+        rectMask.setColor(Color.parseColor("#3E464F"));
+        rectMask.setStyle(Paint.Style.FILL_AND_STROKE);
+        rectMask.setAlpha(200);
 
         screenCenter[0] = (float) Utils.ScreenSize.getWidth(getContext()) / 2;
         screenCenter[1] = (float) Utils.ScreenSize.getHeight(getContext()) / 2;
@@ -70,7 +76,11 @@ public class ImageCropper extends View {
         canvas.save();
         canvas.scale(mScaleFactor, mScaleFactor);
         canvas.drawBitmap(picture, left, top, picturePaint);
-        canvas.drawRect(getCropSquare(), rectPaint);
+        if(mask) {
+            canvas.drawRect(getCropSquare(), rectMask);
+        } else {
+            canvas.drawRect(getCropSquare(), rectPaint);
+        }
         canvas.restore();
     }
 
@@ -87,6 +97,10 @@ public class ImageCropper extends View {
         top = screenCenter[1] - picture.getHeight() / 2;
         mScaleFactor = 1f;
         invalidate();
+    }
+
+    public void  setMask(boolean mask) {
+        this.mask = mask;
     }
 
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener

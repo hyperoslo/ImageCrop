@@ -5,10 +5,12 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -18,6 +20,8 @@ import android.view.View;
  * Created by jean on 07/10/15.
  */
 public class ImageCropper extends View {
+
+    private static String TAG = ImageCropper.class.getName();
 
     private Context context;
     private Bitmap picture;
@@ -122,10 +126,13 @@ public class ImageCropper extends View {
             float dx = rightSide - (left + picture.getWidth());
             float dy = bottomSide - (top + picture.getHeight());
 
+            Log.d(TAG, "scale factor : " + mScaleFactor);
+
             if(left < cropSquare.left && rightSide > cropSquare.right
-                    && top < cropSquare.top && bottomSide > cropSquare.bottom) {
+                    && top < cropSquare.top && bottomSide > cropSquare.bottom
+                    && mScaleFactor < 3.0f) {
                 mScaleFactor *= tempScale;
-                mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 10.0f));
+                mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
                 left -= dx/2;
                 top -= dy/2;
             }

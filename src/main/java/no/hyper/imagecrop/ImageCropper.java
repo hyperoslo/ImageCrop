@@ -21,8 +21,6 @@ import android.view.View;
  */
 public class ImageCropper extends View {
 
-    private static String TAG = ImageCropper.class.getName();
-
     private Context context;
     private Bitmap picture;
     private Paint picturePaint;
@@ -125,8 +123,6 @@ public class ImageCropper extends View {
 
             float dx = rightSide - (left + picture.getWidth());
             float dy = bottomSide - (top + picture.getHeight());
-
-            Log.d(TAG, "scale factor : " + mScaleFactor);
 
             if(left < cropSquare.left && rightSide > cropSquare.right
                     && top < cropSquare.top && bottomSide > cropSquare.bottom

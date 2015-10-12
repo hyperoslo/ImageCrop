@@ -3,14 +3,16 @@ package no.hyper.imagecrop;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.ExifInterface;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -21,14 +23,20 @@ import android.view.View;
  */
 public class ImageCropper extends View {
 
+    private static final int TARGET_WIDTH = 1280;
+
     private Context context;
     private Bitmap picture;
     private Paint picturePaint;
     private Paint rectPaint;
     private Paint rectMask;
-    private float cropWidth;
-    private float cropHeight;
+    private Point middle;
+    private float cropSize;
     private boolean mask = false;
+    private String picturePath;
+
+    private int screenWidth;
+    private int screenHeight;
 
     private float left;
     private float top;
@@ -36,7 +44,6 @@ public class ImageCropper extends View {
     private ScaleGestureDetector mScaleDetector;
     private GestureDetectorCompat mGestureDetector;
     private float mScaleFactor = 1.f;
-    private float[] screenCenter = new float[2];
 
     public ImageCropper(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -49,8 +56,7 @@ public class ImageCropper extends View {
                 attrs, R.styleable.ImageCropper, 0, 0);
 
         try {
-            cropWidth = (float) array.getInt(R.styleable.ImageCropper_crop_width, 500) / 2;
-            cropHeight = (float) array.getInt(R.styleable.ImageCropper_crop_height, 500) / 2;
+            cropSize = (float) array.getInt(R.styleable.ImageCropper_crop_size, 500);
         } finally {
             array.recycle();
         }
@@ -68,8 +74,10 @@ public class ImageCropper extends View {
         rectMask.setStyle(Paint.Style.FILL_AND_STROKE);
         rectMask.setAlpha(200);
 
-        screenCenter[0] = (float) Utils.ScreenSize.getWidth(getContext()) / 2;
-        screenCenter[1] = (float) Utils.ScreenSize.getHeight(getContext()) / 2;
+        middle = new Point(Utils.ScreenSize.getWidth(getContext()) / 2,
+                Utils.ScreenSize.getHeight(getContext()) / 2);
+        screenHeight = Utils.ScreenSize.getHeight(context);
+        screenWidth = Utils.ScreenSize.getWidth(context);
     }
 
     @Override
@@ -95,14 +103,53 @@ public class ImageCropper extends View {
 
     public void setPicture(Bitmap picture) {
         this.picture = picture;
-        left = screenCenter[0] - picture.getWidth() / 2;
-        top = screenCenter[1] - picture.getHeight() / 2;
+        left = middle.x - picture.getWidth() / 2;
+        top = middle.y - picture.getHeight() / 2;
         mScaleFactor = 1f;
+
+        while(picture.getWidth()*mScaleFactor < cropSize ||
+                picture.getHeight()*mScaleFactor < cropSize) {
+            mScaleFactor += 0.1;
+        }
+
         invalidate();
+    }
+
+    public Bitmap createSafeBitmap(String picturePath) {
+        this.picturePath = picturePath;
+        int[] dimens = Utils.Image.getImageInfo(picturePath);
+        int rotation = getRotationValue();
+        float pictureWidth = (rotation != 0 && rotation != 270) ? dimens[1] : dimens[0];
+
+        float scaleFactor = TARGET_WIDTH / pictureWidth;
+        float newX = dimens[0] * scaleFactor;
+        float newY = dimens[1] * scaleFactor;
+
+        Bitmap original = BitmapFactory.decodeFile(picturePath);
+        original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
+        return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),
+                getRotationMatrix(), true);
     }
 
     public void  setMask(boolean mask) {
         this.mask = mask;
+    }
+
+    public Bitmap getCroppedPicture() {
+        Rect rect = getCropSquare();
+
+        int x = (Math.round(rect.left) - Math.round(left));
+        int y = Math.round(rect.top) - Math.round(top);
+
+        Bitmap newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0,
+                Math.round(cropSize/mScaleFactor), Math.round(cropSize/mScaleFactor));
+
+        return Bitmap.createScaledBitmap(newBitmap, Math.round(cropSize),
+                Math.round(cropSize), true);
+    }
+
+    public void setBottomPanelSize(int size) {
+        middle.y -= size;
     }
 
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
@@ -131,9 +178,9 @@ public class ImageCropper extends View {
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
                 left -= dx/2;
                 top -= dy/2;
+                invalidate();
             }
 
-            invalidate();
             return true;
         }
 
@@ -153,12 +200,12 @@ public class ImageCropper extends View {
                 float newX = left - distanceX*(1/mScaleFactor);
                 float newY = top - distanceY*(1/mScaleFactor);
 
-                float minX = (screenCenter[0] + cropWidth)*(1/mScaleFactor)
+                float minX = (middle.x + cropSize /2)*(1/mScaleFactor)
                         - picture.getWidth();
-                float maxX = (screenCenter[0] - cropWidth)*(1/mScaleFactor);
-                float minY = (screenCenter[1] + cropHeight)*(1/mScaleFactor)
+                float maxX = (middle.x - cropSize /2)*(1/mScaleFactor);
+                float minY = (middle.y + cropSize/2)*(1/mScaleFactor)
                         - picture.getHeight();
-                float maxY = (screenCenter[1] - cropHeight)*(1/mScaleFactor);
+                float maxY = (middle.y - cropSize/2)*(1/mScaleFactor);
 
                 if(newX > minX && newX < maxX) {
                     left = newX;
@@ -175,28 +222,59 @@ public class ImageCropper extends View {
     };
 
     private Rect getCropSquare() {
+
+        if(screenWidth < cropSize || screenHeight < cropSize) {
+            cropSize = Math.min((float)screenWidth - 5, (float)screenHeight - 5);
+        }
+
         return new Rect(
-            Math.round((screenCenter[0] - cropWidth)*(1/mScaleFactor)),
-            Math.round((screenCenter[1] - cropHeight)*(1/mScaleFactor)),
-            Math.round((screenCenter[0] + cropWidth)*(1/mScaleFactor)),
-            Math.round((screenCenter[1] + cropHeight)*(1/mScaleFactor))
+            Math.round((middle.x - cropSize/2)*(1/mScaleFactor)),
+            Math.round((middle.y - cropSize/2)*(1/mScaleFactor)),
+            Math.round((middle.x + cropSize/2)*(1/mScaleFactor)),
+            Math.round((middle.y + cropSize/2)*(1/mScaleFactor))
         );
     }
 
-    public Bitmap getCroppedPicture() {
-        Rect rect = getCropSquare();
-        Bitmap scaled = Bitmap.createScaledBitmap(
-                picture,
-                Math.round(picture.getWidth()*mScaleFactor),
-                Math.round(picture.getHeight()*mScaleFactor),
-                true
-        );
+    private int getRotationValue() {
+        int rotate = 0;
+        try {
+            ExifInterface exif = new ExifInterface(picturePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-        int x = Math.round(rect.left*mScaleFactor) - Math.round(left*mScaleFactor);
-        int y = Math.round(rect.top*mScaleFactor) - Math.round(top*mScaleFactor);
-
-        picture.recycle();
-        return Bitmap.createBitmap(scaled, (x > 0) ? x : 0, (y > 0) ? y : 0,
-                Math.round(cropWidth * 2), Math.round(cropHeight * 2));
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rotate;
     }
+
+    private Matrix getRotationMatrix() {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(getRotationValue());
+        return matrix;
+    }
+
+    public static float calculateInSampleSize(int width, int height,
+                                            int reqWidth, int reqHeight) {
+        float inSampleSize = 1;
+
+        while ((height / inSampleSize) > reqHeight
+                && (width / inSampleSize) > reqWidth) {
+            inSampleSize += 0.1;
+        }
+
+        return inSampleSize;
+    }
+
 }
+

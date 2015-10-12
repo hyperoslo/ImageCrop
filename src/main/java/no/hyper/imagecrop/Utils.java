@@ -1,6 +1,7 @@
 package no.hyper.imagecrop;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.WindowManager;
@@ -32,6 +33,17 @@ public class Utils {
             int height = size.y;
 
             return height;
+        }
+    }
+
+    public static class Image {
+
+        public static int[] getImageInfo(String path) {
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, bmOptions);
+
+            return new int[]{bmOptions.outWidth, bmOptions.outHeight};
         }
     }
 }

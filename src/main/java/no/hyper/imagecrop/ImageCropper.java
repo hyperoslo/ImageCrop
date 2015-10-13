@@ -123,7 +123,10 @@ public class ImageCropper extends View {
         float newX = dimens[0] * scaleFactor;
         float newY = dimens[1] * scaleFactor;
 
-        Bitmap original = BitmapFactory.decodeFile(picturePath);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = calculateInSampleSize(dimens[0], dimens[1],
+                screenWidth, screenHeight);
+        Bitmap original = BitmapFactory.decodeFile(picturePath, options);
         original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
         return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),
                 getRotationMatrix(), true);
@@ -262,13 +265,13 @@ public class ImageCropper extends View {
         return matrix;
     }
 
-    public static float calculateInSampleSize(int width, int height,
+    public static int calculateInSampleSize(int width, int height,
                                             int reqWidth, int reqHeight) {
-        float inSampleSize = 1;
+        int inSampleSize = 1;
 
         while ((height / inSampleSize) > reqHeight
                 && (width / inSampleSize) > reqWidth) {
-            inSampleSize += 0.1;
+            inSampleSize += 1;
         }
 
         return inSampleSize;

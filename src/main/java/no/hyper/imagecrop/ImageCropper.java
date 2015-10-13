@@ -23,8 +23,6 @@ import android.view.View;
  */
 public class ImageCropper extends View {
 
-    private static final int TARGET_WIDTH = 1280;
-
     private Context context;
     private Bitmap picture;
     private Paint picturePaint;
@@ -121,11 +119,14 @@ public class ImageCropper extends View {
         int rotation = getRotationValue();
         float pictureWidth = (rotation != 0 && rotation != 270) ? dimens[1] : dimens[0];
 
-        float scaleFactor = TARGET_WIDTH / pictureWidth;
+        float scaleFactor = screenWidth / pictureWidth;
         float newX = dimens[0] * scaleFactor;
         float newY = dimens[1] * scaleFactor;
 
-        Bitmap original = BitmapFactory.decodeFile(picturePath);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = calculateInSampleSize(dimens[0], dimens[1],
+                screenWidth, screenHeight);
+        Bitmap original = BitmapFactory.decodeFile(picturePath, options);
         original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
         return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),
                 getRotationMatrix(), true);
@@ -264,13 +265,13 @@ public class ImageCropper extends View {
         return matrix;
     }
 
-    public static float calculateInSampleSize(int width, int height,
+    public static int calculateInSampleSize(int width, int height,
                                             int reqWidth, int reqHeight) {
-        float inSampleSize = 1;
+        int inSampleSize = 1;
 
         while ((height / inSampleSize) > reqHeight
                 && (width / inSampleSize) > reqWidth) {
-            inSampleSize += 0.1;
+            inSampleSize += 1;
         }
 
         return inSampleSize;

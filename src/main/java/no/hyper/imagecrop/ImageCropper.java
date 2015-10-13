@@ -23,8 +23,6 @@ import android.view.View;
  */
 public class ImageCropper extends View {
 
-    private static final int TARGET_WIDTH = 1280;
-
     private Context context;
     private Bitmap picture;
     private Paint picturePaint;
@@ -121,7 +119,7 @@ public class ImageCropper extends View {
         int rotation = getRotationValue();
         float pictureWidth = (rotation != 0 && rotation != 270) ? dimens[1] : dimens[0];
 
-        float scaleFactor = TARGET_WIDTH / pictureWidth;
+        float scaleFactor = screenWidth / pictureWidth;
         float newX = dimens[0] * scaleFactor;
         float newY = dimens[1] * scaleFactor;
 

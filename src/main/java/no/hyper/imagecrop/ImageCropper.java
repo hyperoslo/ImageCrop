@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -169,16 +170,21 @@ public class ImageCropper extends View {
             float bottomSide = (top * tempScale) + (picture.getHeight() * tempScale);
             Rect cropSquare = getCropSquare();
 
+            float fx = scaleGestureDetector.getFocusX();
+            float fy = scaleGestureDetector.getFocusY();
             float dx = rightSide - (left + picture.getWidth());
             float dy = bottomSide - (top + picture.getHeight());
 
             if(left < cropSquare.left && rightSide > cropSquare.right
                     && top < cropSquare.top && bottomSide > cropSquare.bottom
-                    && mScaleFactor < 3.0f) {
+                    && mScaleFactor <= 3.0f) {
                 mScaleFactor *= tempScale;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
-                left -= dx/2;
-                top -= dy/2;
+
+                Log.d("TEST", "focus x: " + fx + " focus y: " + fy + " left: " + (left - fx - dx/2) + " top: " + (top - fy - dy/2));
+
+                left = left - (fx / (picture.getWidth()*mScaleFactor))*dx;
+                top = top - (fy / (picture.getHeight()*mScaleFactor))*dy;
                 invalidate();
             }
 

@@ -9,11 +9,12 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -26,17 +27,20 @@ public class ImageCropper extends View {
 
     private Context context;
     private Bitmap picture;
-    private Paint picturePaint;
-    private Paint rectPaint;
-    private Paint rectMask;
+    private Bitmap bitmapOverlay;
     private Point middle;
-    private float cropSize;
-    private boolean mask = false;
-    private String picturePath;
+    private Rect cropRect;
 
+    private Paint bitmapPaint;
+    private Paint bitmapOverlayPaint;
+    private Paint maskPaint;
+    private Paint overlayRectPaint;
+    private Paint cropRectPaint;
+
+    private float cropSize;
+    private String picturePath;
     private int screenWidth;
     private int screenHeight;
-
     private float left;
     private float top;
 
@@ -64,19 +68,31 @@ public class ImageCropper extends View {
     }
 
     private void init() {
-        picturePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-        rectPaint = new Paint();
-        rectPaint.setColor(Color.WHITE);
-        rectPaint.setStyle(Paint.Style.STROKE);
-        rectMask = new Paint();
-        rectMask.setColor(Color.parseColor("#3E464F"));
-        rectMask.setStyle(Paint.Style.FILL_AND_STROKE);
-        rectMask.setAlpha(200);
+        bitmapPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        bitmapOverlayPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        bitmapOverlayPaint.setAlpha(170);
+
+        maskPaint = new Paint();
+        maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+        overlayRectPaint = new Paint();
+        overlayRectPaint.setColor(Color.BLACK);
+        overlayRectPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        cropRectPaint = new Paint();
+        cropRectPaint.setStyle(Paint.Style.STROKE);
+        cropRectPaint.setColor(Color.WHITE);
 
         middle = new Point(Utils.ScreenSize.getWidth(getContext()) / 2,
                 Utils.ScreenSize.getHeight(getContext()) / 2);
         screenHeight = Utils.ScreenSize.getHeight(context);
         screenWidth = Utils.ScreenSize.getWidth(context);
+
+        if(screenWidth < cropSize || screenHeight < cropSize) {
+            cropSize = Math.min((float)screenWidth - 5, (float)screenHeight - 5);
+        }
+        cropRect = new Rect();
+        bitmapOverlay = setBitmapOverlay();
     }
 
     @Override
@@ -84,12 +100,12 @@ public class ImageCropper extends View {
         super.onDraw(canvas);
         canvas.save();
         canvas.scale(mScaleFactor, mScaleFactor);
-        canvas.drawBitmap(picture, left, top, picturePaint);
-        if(mask) {
-            canvas.drawRect(getCropSquare(), rectMask);
-        } else {
-            canvas.drawRect(getCropSquare(), rectPaint);
-        }
+        canvas.drawBitmap(picture, left, top, bitmapPaint);
+
+        canvas.drawBitmap(bitmapOverlay, 0, 0, bitmapOverlayPaint);
+
+        canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, cropRectPaint);
+
         canvas.restore();
     }
 
@@ -133,15 +149,9 @@ public class ImageCropper extends View {
                 getRotationMatrix(), true);
     }
 
-    public void  setMask(boolean mask) {
-        this.mask = mask;
-    }
-
     public Bitmap getCroppedPicture() {
-        Rect rect = getCropSquare();
-
-        int x = (Math.round(rect.left) - Math.round(left));
-        int y = Math.round(rect.top) - Math.round(top);
+        int x = (Math.round(cropRect.left) - Math.round(left));
+        int y = Math.round(cropRect.top) - Math.round(top);
 
         Bitmap newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0,
                 Math.round(cropSize/mScaleFactor), Math.round(cropSize/mScaleFactor));
@@ -152,6 +162,9 @@ public class ImageCropper extends View {
 
     public void setBottomPanelSize(int size) {
         middle.y -= size;
+        int[] dimens = getCropSquareDimens();
+        cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
+        bitmapOverlay = setBitmapOverlay();
     }
 
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
@@ -168,23 +181,26 @@ public class ImageCropper extends View {
 
             float rightSide = (left * tempScale) + (picture.getWidth() * tempScale);
             float bottomSide = (top * tempScale) + (picture.getHeight() * tempScale);
-            Rect cropSquare = getCropSquare();
 
             float fx = scaleGestureDetector.getFocusX();
             float fy = scaleGestureDetector.getFocusY();
             float dx = rightSide - (left + picture.getWidth());
             float dy = bottomSide - (top + picture.getHeight());
 
-            if(left < cropSquare.left && rightSide > cropSquare.right
-                    && top < cropSquare.top && bottomSide > cropSquare.bottom
+            if(left < cropRect.left && rightSide > cropRect.right
+                    && top < cropRect.top && bottomSide > cropRect.bottom
                     && mScaleFactor <= 3.0f) {
+
                 mScaleFactor *= tempScale;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
 
-                Log.d("TEST", "focus x: " + fx + " focus y: " + fy + " left: " + (left - fx - dx/2) + " top: " + (top - fy - dy/2));
-
                 left = left - (fx / (picture.getWidth()*mScaleFactor))*dx;
                 top = top - (fy / (picture.getHeight()*mScaleFactor))*dy;
+
+                int[] dimens = getCropSquareDimens();
+                cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
+                bitmapOverlay = setBitmapOverlay();
+
                 invalidate();
             }
 
@@ -228,18 +244,25 @@ public class ImageCropper extends View {
         }
     };
 
-    private Rect getCropSquare() {
+    private int[] getCropSquareDimens() {
+        return new int[]{
+                Math.round((middle.x - cropSize/2)/mScaleFactor),
+                Math.round((middle.y - cropSize/2)/mScaleFactor),
+                Math.round((middle.x + cropSize/2)/mScaleFactor),
+                Math.round((middle.y + cropSize/2)/mScaleFactor)
+        };
+    }
 
-        if(screenWidth < cropSize || screenHeight < cropSize) {
-            cropSize = Math.min((float)screenWidth - 5, (float)screenHeight - 5);
-        }
-
-        return new Rect(
-            Math.round((middle.x - cropSize/2)*(1/mScaleFactor)),
-            Math.round((middle.y - cropSize/2)*(1/mScaleFactor)),
-            Math.round((middle.x + cropSize/2)*(1/mScaleFactor)),
-            Math.round((middle.y + cropSize/2)*(1/mScaleFactor))
-        );
+    private Bitmap setBitmapOverlay() {
+        Bitmap bitmap = Bitmap.createBitmap(
+                Math.round(screenWidth/mScaleFactor),
+                Math.round(screenHeight/mScaleFactor), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawRect(0, 0,
+                Math.round(screenWidth/mScaleFactor), Math.round(screenHeight/mScaleFactor),
+                overlayRectPaint);
+        canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, maskPaint);
+        return bitmap;
     }
 
     private int getRotationValue() {

@@ -156,9 +156,7 @@ public class ImageCropper extends View {
         options.inSampleSize = calculateInSampleSize(dimens[0], dimens[1],
                 screenWidth, screenHeight);
 
-        picturePath = null;
         Bitmap original = BitmapFactory.decodeFile(picturePath, options);
-
         if(original != null) {
             original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
             return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),

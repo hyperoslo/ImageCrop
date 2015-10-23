@@ -20,6 +20,8 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import no.hyper.imagecrop.R;
+
 /**
  * Created by jean on 07/10/15.
  */
@@ -28,6 +30,7 @@ public class ImageCropper extends View {
     private Context context;
     private Bitmap picture;
     private Bitmap bitmapOverlay;
+    private Bitmap support;
     private Point middle;
     private Rect cropRect;
 
@@ -70,7 +73,7 @@ public class ImageCropper extends View {
     private void init() {
         bitmapPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
         bitmapOverlayPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-        bitmapOverlayPaint.setAlpha(170);
+        bitmapOverlayPaint.setAlpha(120);
 
         maskPaint = new Paint();
         maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -93,27 +96,10 @@ public class ImageCropper extends View {
         }
         cropRect = new Rect();
         bitmapOverlay = setBitmapOverlay();
-    }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        canvas.save();
-        canvas.scale(mScaleFactor, mScaleFactor);
-        canvas.drawBitmap(picture, left, top, bitmapPaint);
-
-        canvas.drawBitmap(bitmapOverlay, 0, 0, bitmapOverlayPaint);
-
-        canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, cropRectPaint);
-
-        canvas.restore();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        boolean retVal = mScaleDetector.onTouchEvent(ev);
-        retVal = mGestureDetector.onTouchEvent(ev) || retVal;
-        return retVal || super.onTouchEvent(ev);
+        picture = Bitmap.createBitmap(
+                Math.round(screenWidth / mScaleFactor) + 5,
+                Math.round(screenHeight / mScaleFactor) + 5, Bitmap.Config.ARGB_8888);
     }
 
     public void setPicture(Bitmap picture) {
@@ -130,6 +116,32 @@ public class ImageCropper extends View {
         invalidate();
     }
 
+    public void setBottomPanelSize(int size) {
+        middle.y -= size;
+        int[] dimens = getCropSquareDimens();
+        cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
+        bitmapOverlay = setBitmapOverlay();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        canvas.save();
+        canvas.scale(mScaleFactor, mScaleFactor);
+        canvas.drawBitmap(picture, left, top, bitmapPaint);
+        canvas.drawBitmap(bitmapOverlay, 0, 0, bitmapOverlayPaint);
+        canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, cropRectPaint);
+        canvas.restore();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean retVal = mScaleDetector.onTouchEvent(ev);
+        retVal = mGestureDetector.onTouchEvent(ev) || retVal;
+        return retVal || super.onTouchEvent(ev);
+    }
+
     public Bitmap createSafeBitmap(String picturePath) {
         this.picturePath = picturePath;
         int[] dimens = Utils.Image.getImageInfo(picturePath);
@@ -143,10 +155,15 @@ public class ImageCropper extends View {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = calculateInSampleSize(dimens[0], dimens[1],
                 screenWidth, screenHeight);
+
         Bitmap original = BitmapFactory.decodeFile(picturePath, options);
-        original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
-        return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),
-                getRotationMatrix(), true);
+        if(original != null) {
+            original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
+            return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),
+                    getRotationMatrix(), true);
+        } else {
+            return null;
+        }
     }
 
     public Bitmap getCroppedPicture() {
@@ -154,17 +171,10 @@ public class ImageCropper extends View {
         int y = Math.round(cropRect.top) - Math.round(top);
 
         Bitmap newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0,
-                Math.round(cropSize/mScaleFactor), Math.round(cropSize/mScaleFactor));
+                Math.round(cropSize / mScaleFactor), Math.round(cropSize / mScaleFactor));
 
         return Bitmap.createScaledBitmap(newBitmap, Math.round(cropSize),
                 Math.round(cropSize), true);
-    }
-
-    public void setBottomPanelSize(int size) {
-        middle.y -= size;
-        int[] dimens = getCropSquareDimens();
-        cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
-        bitmapOverlay = setBitmapOverlay();
     }
 
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
@@ -176,22 +186,21 @@ public class ImageCropper extends View {
         }
 
         @Override
-        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-            float tempScale = scaleGestureDetector.getScaleFactor();
+        public boolean onScale(ScaleGestureDetector detector) {
+            float scale = detector.getScaleFactor();
+            float scaledWidth = picture.getWidth() * scale;
+            float scaledHeight = picture.getHeight() * scale;
+            float scaledRightSide = (left * scale) + scaledWidth;
+            float scaledBottomSide = (top * scale) + scaledHeight;
 
-            float rightSide = (left * tempScale) + (picture.getWidth() * tempScale);
-            float bottomSide = (top * tempScale) + (picture.getHeight() * tempScale);
+            float fx = detector.getFocusX();
+            float fy = detector.getFocusY();
+            float dx = scaledRightSide - (left + picture.getWidth());
+            float dy = scaledBottomSide - (top + picture.getHeight());
 
-            float fx = scaleGestureDetector.getFocusX();
-            float fy = scaleGestureDetector.getFocusY();
-            float dx = rightSide - (left + picture.getWidth());
-            float dy = bottomSide - (top + picture.getHeight());
-
-            if(left < cropRect.left && rightSide > cropRect.right
-                    && top < cropRect.top && bottomSide > cropRect.bottom
-                    && mScaleFactor <= 3.0f) {
-
-                mScaleFactor *= tempScale;
+            float temp = mScaleFactor*scale;
+            if(temp >= 0.6f && temp <= 3.0f) {
+                mScaleFactor *= scale;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
 
                 left = left - (fx / (picture.getWidth()*mScaleFactor))*dx;
@@ -200,13 +209,56 @@ public class ImageCropper extends View {
                 int[] dimens = getCropSquareDimens();
                 cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
                 bitmapOverlay = setBitmapOverlay();
-
                 invalidate();
             }
 
             return true;
         }
 
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            super.onScaleEnd(detector);
+            float scaledWidth = picture.getWidth() * mScaleFactor;
+            float scaledHeight = picture.getHeight() * mScaleFactor;
+
+            if(scaledWidth < cropSize || scaledHeight < cropSize) {
+
+                while (scaledWidth < cropSize || scaledHeight < cropSize) {
+                    mScaleFactor += 0.05f;
+                    scaledWidth = picture.getWidth() * mScaleFactor;
+                    scaledHeight = picture.getHeight() * mScaleFactor;
+                }
+
+                int[] dimens = getCropSquareDimens();
+                cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
+                left = middle.x - picture.getWidth() / 2;
+                top = cropRect.top;
+                bitmapOverlay = setBitmapOverlay();
+                invalidate();
+            } else {
+                if(left > cropRect.left) {
+                    left = cropRect.left;
+                    invalidate();
+                }
+
+                if(top > cropRect.top) {
+                    top = cropRect.top;
+                    invalidate();
+                }
+
+                if(left + picture.getWidth() < cropRect.right) {
+                    left += cropRect.right - (left + picture.getWidth());
+                    invalidate();
+                }
+
+                if(top + picture.getHeight() < cropRect.bottom) {
+                    top += cropRect.bottom - (top + picture.getHeight());
+                    invalidate();
+                }
+            }
+
+
+        }
     };
 
     private final GestureDetector.SimpleOnGestureListener mGestureListener
@@ -220,15 +272,15 @@ public class ImageCropper extends View {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if(!mScaleDetector.isInProgress()) {
 
-                float newX = left - distanceX*(1/mScaleFactor);
-                float newY = top - distanceY*(1/mScaleFactor);
+                float newX = left - distanceX/mScaleFactor;
+                float newY = top - distanceY/mScaleFactor;
 
-                float minX = (middle.x + cropSize /2)*(1/mScaleFactor)
+                float minX = (middle.x + cropSize /2)/mScaleFactor
                         - picture.getWidth();
-                float maxX = (middle.x - cropSize /2)*(1/mScaleFactor);
-                float minY = (middle.y + cropSize/2)*(1/mScaleFactor)
+                float maxX = (middle.x - cropSize /2)/mScaleFactor;
+                float minY = (middle.y + cropSize/2)/mScaleFactor
                         - picture.getHeight();
-                float maxY = (middle.y - cropSize/2)*(1/mScaleFactor);
+                float maxY = (middle.y - cropSize/2)/mScaleFactor;
 
                 if(newX > minX && newX < maxX) {
                     left = newX;
@@ -254,15 +306,18 @@ public class ImageCropper extends View {
     }
 
     private Bitmap setBitmapOverlay() {
-        Bitmap bitmap = Bitmap.createBitmap(
-                Math.round(screenWidth/mScaleFactor),
-                Math.round(screenHeight/mScaleFactor), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
+        if(support != null) {
+            support.recycle();
+        }
+        support = Bitmap.createBitmap(
+                Math.round(screenWidth / mScaleFactor)+5,
+                Math.round(screenHeight / mScaleFactor)+5, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(support);
         canvas.drawRect(0, 0,
-                Math.round(screenWidth/mScaleFactor), Math.round(screenHeight/mScaleFactor),
+                Math.round(screenWidth/mScaleFactor)+5, Math.round(screenHeight/mScaleFactor)+5,
                 overlayRectPaint);
         canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, maskPaint);
-        return bitmap;
+        return support;
     }
 
     private int getRotationValue() {
@@ -294,7 +349,7 @@ public class ImageCropper extends View {
         return matrix;
     }
 
-    public static int calculateInSampleSize(int width, int height,
+    private static int calculateInSampleSize(int width, int height,
                                             int reqWidth, int reqHeight) {
         int inSampleSize = 1;
 

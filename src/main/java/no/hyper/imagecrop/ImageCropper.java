@@ -221,22 +221,6 @@ public class ImageCropper extends View {
             float scaledWidth = picture.getWidth() * mScaleFactor;
             float scaledHeight = picture.getHeight() * mScaleFactor;
 
-            if(left > cropRect.left) {
-                left = cropRect.left;
-            }
-
-            if(top > cropRect.top) {
-                top = cropRect.top;
-            }
-
-            if(left + picture.getWidth() < cropRect.right) {
-                left += cropRect.right - (left + picture.getWidth());
-            }
-
-            if(top + picture.getHeight() < cropRect.bottom) {
-                top += cropRect.bottom - (top + picture.getHeight());
-            }
-
             if(scaledWidth < cropSize || scaledHeight < cropSize) {
 
                 while (scaledWidth < cropSize || scaledHeight < cropSize) {
@@ -250,9 +234,30 @@ public class ImageCropper extends View {
                 left = middle.x - picture.getWidth() / 2;
                 top = cropRect.top;
                 bitmapOverlay = setBitmapOverlay();
+                invalidate();
+            } else {
+                if(left > cropRect.left) {
+                    left = cropRect.left;
+                    invalidate();
+                }
+
+                if(top > cropRect.top) {
+                    top = cropRect.top;
+                    invalidate();
+                }
+
+                if(left + picture.getWidth() < cropRect.right) {
+                    left += cropRect.right - (left + picture.getWidth());
+                    invalidate();
+                }
+
+                if(top + picture.getHeight() < cropRect.bottom) {
+                    top += cropRect.bottom - (top + picture.getHeight());
+                    invalidate();
+                }
             }
 
-            invalidate();
+
         }
     };
 

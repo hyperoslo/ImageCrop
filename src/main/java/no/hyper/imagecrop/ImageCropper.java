@@ -15,6 +15,7 @@ import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -86,47 +87,39 @@ public class ImageCropper extends View {
         cropRectPaint.setStyle(Paint.Style.STROKE);
         cropRectPaint.setColor(Color.WHITE);
 
-        middle = new Point(Utils.ScreenSize.getWidth(getContext()) / 2,
-                Utils.ScreenSize.getHeight(getContext()) / 2);
         screenHeight = Utils.ScreenSize.getHeight(context);
         screenWidth = Utils.ScreenSize.getWidth(context);
 
-        if(screenWidth < cropSize || screenHeight < cropSize) {
-            cropSize = Math.min((float)screenWidth - 5, (float)screenHeight - 5);
+        middle = new Point(screenWidth / 2, screenHeight / 2);
+
+        while(screenWidth < cropSize || screenHeight < cropSize) {
+            cropSize -= 50;
         }
+
         cropRect = new Rect();
         bitmapOverlay = setBitmapOverlay();
-
-        picture = Bitmap.createBitmap(
-                Math.round(screenWidth / mScaleFactor) + 5,
-                Math.round(screenHeight / mScaleFactor) + 5, Bitmap.Config.ARGB_8888);
     }
 
     public void setPicture(Bitmap picture) {
-        this.picture = picture;
-        left = middle.x - picture.getWidth() / 2;
-        top = middle.y - picture.getHeight() / 2;
         mScaleFactor = 1f;
-
         while(picture.getWidth()*mScaleFactor < cropSize ||
                 picture.getHeight()*mScaleFactor < cropSize) {
             mScaleFactor += 0.1;
         }
 
-        invalidate();
-    }
+        this.picture = picture;
+        left = (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
+        top = (middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
 
-    public void setBottomPanelSize(int size) {
-        middle.y -= size;
         int[] dimens = getCropSquareDimens();
         cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
         bitmapOverlay = setBitmapOverlay();
+        invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         canvas.save();
         canvas.scale(mScaleFactor, mScaleFactor);
         canvas.drawBitmap(picture, left, top, bitmapPaint);
@@ -144,23 +137,20 @@ public class ImageCropper extends View {
 
     public Bitmap createSafeBitmap(String picturePath) {
         this.picturePath = picturePath;
-        int[] dimens = Utils.Image.getImageInfo(picturePath);
-        int rotation = getRotationValue();
-        float pictureWidth = (rotation != 0 && rotation != 270) ? dimens[1] : dimens[0];
-
-        float scaleFactor = screenWidth / pictureWidth;
-        float newX = dimens[0] * scaleFactor;
-        float newY = dimens[1] * scaleFactor;
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = calculateInSampleSize(dimens[0], dimens[1],
+        BitmapFactory.Options options = Utils.Image.getImageInfo(picturePath);
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = calculateInSampleSize(options,
                 screenWidth, screenHeight);
 
-        Bitmap original = BitmapFactory.decodeFile(picturePath, options);
-        if(original != null) {
-            original = Bitmap.createScaledBitmap(original, Math.round(newX), Math.round(newY), true);
-            return Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(),
-                    getRotationMatrix(), true);
+        Bitmap bitmap = BitmapFactory.decodeFile(picturePath, options);
+        if(bitmap != null) {
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), getRotationMatrix(), true);
+
+            float scaleFactor = (float)screenWidth / (float)bitmap.getWidth();
+            int newWidth = screenWidth;
+            int newHeight = Math.round(bitmap.getHeight() * scaleFactor);
+            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+            return bitmap;
         } else {
             return null;
         }
@@ -197,9 +187,9 @@ public class ImageCropper extends View {
             float fy = detector.getFocusY();
             float dx = scaledRightSide - (left + picture.getWidth());
             float dy = scaledBottomSide - (top + picture.getHeight());
-
             float temp = mScaleFactor*scale;
-            if(temp >= 0.6f && temp <= 3.0f) {
+
+            if(temp >= 0.8f && temp <= 3.0f) {
                 mScaleFactor *= scale;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
 
@@ -231,8 +221,8 @@ public class ImageCropper extends View {
 
                 int[] dimens = getCropSquareDimens();
                 cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
-                left = middle.x - picture.getWidth() / 2;
-                top = cropRect.top;
+                left = (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
+                top = (middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
                 bitmapOverlay = setBitmapOverlay();
                 invalidate();
             } else {
@@ -256,9 +246,8 @@ public class ImageCropper extends View {
                     invalidate();
                 }
             }
-
-
         }
+
     };
 
     private final GestureDetector.SimpleOnGestureListener mGestureListener
@@ -349,13 +338,19 @@ public class ImageCropper extends View {
         return matrix;
     }
 
-    private static int calculateInSampleSize(int width, int height,
-                                            int reqWidth, int reqHeight) {
-        int inSampleSize = 1;
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth,
+                                             int reqHeight) {
+        int inSampleSize = 2;
+        int rotation = getRotationValue();
+        int width = options.outWidth;
+        int height = options.outHeight;
+        if(rotation == 90 || rotation == 270) {
+            width = options.outHeight;
+            height = options.outWidth;
+        }
 
-        while ((height / inSampleSize) > reqHeight
-                && (width / inSampleSize) > reqWidth) {
-            inSampleSize += 1;
+        while (width / inSampleSize > reqWidth ||  height / inSampleSize > reqHeight) {
+            inSampleSize *= 2;
         }
 
         return inSampleSize;

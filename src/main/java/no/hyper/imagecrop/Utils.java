@@ -38,12 +38,12 @@ public class Utils {
 
     public static class Image {
 
-        public static int[] getImageInfo(String path) {
+        public static BitmapFactory.Options getImageInfo(String path) {
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(path, bmOptions);
 
-            return new int[]{bmOptions.outWidth, bmOptions.outHeight};
+            return bmOptions;
         }
     }
 }

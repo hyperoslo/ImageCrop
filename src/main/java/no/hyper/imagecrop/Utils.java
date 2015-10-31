@@ -18,10 +18,8 @@ public class Utils {
             Display display = wm.getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
-            int width = size.x;
-            int height = size.y;
 
-            return width;
+            return size.x;
         }
 
         public static int getHeight(Context ctx) {
@@ -29,10 +27,8 @@ public class Utils {
             Display display = wm.getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
-            int width = size.x;
-            int height = size.y;
 
-            return height;
+            return size.y;
         }
     }
 

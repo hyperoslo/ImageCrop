@@ -189,7 +189,7 @@ public class ImageCropper extends View {
             float dy = scaledBottomSide - (top + picture.getHeight());
             float temp = mScaleFactor*scale;
 
-            if(temp >= 0.8f && temp <= 3.0f) {
+            if(temp >= 0.3f && temp <= 3.0f) {
                 mScaleFactor *= scale;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
 

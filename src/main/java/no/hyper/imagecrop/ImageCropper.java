@@ -149,17 +149,15 @@ public class ImageCropper extends View {
             float scale = detector.getScaleFactor();
             float scaledWidth = picture.getWidth() * scale;
             float scaledHeight = picture.getHeight() * scale;
-            float scaledRightSide = (left * scale) + scaledWidth;
-            float scaledBottomSide = (top * scale) + scaledHeight;
 
             float fx = detector.getFocusX();
             float fy = detector.getFocusY();
-            float dx = scaledRightSide - (left + picture.getWidth());
-            float dy = scaledBottomSide - (top + picture.getHeight());
+            float dx = scaledWidth - picture.getWidth();
+            float dy = scaledHeight - picture.getHeight();
             float temp = mScaleFactor*scale;
 
-            if(temp >= 0.5f && temp <= 3.0f) {
-                mScaleFactor *= scale;
+            if(temp >= 0.1f && temp <= 3.0f) {
+                mScaleFactor = temp;
                 mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
 
                 left = left - (fx / (picture.getWidth()*mScaleFactor))*dx;

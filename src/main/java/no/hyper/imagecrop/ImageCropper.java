@@ -147,31 +147,47 @@ public class ImageCropper extends View {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float scale = detector.getScaleFactor();
-            float scaledWidth = picture.getWidth() * scale;
-            float scaledHeight = picture.getHeight() * scale;
-
             float fx = detector.getFocusX();
             float fy = detector.getFocusY();
-            float dx = scaledWidth - picture.getWidth();
-            float dy = scaledHeight - picture.getHeight();
-            float temp = mScaleFactor*scale;
+            float sw = picture.getWidth()*scale;
+            float sh = picture.getHeight()*scale;
+            float dx = sw - picture.getWidth();
+            float dy = sh - picture.getHeight();
 
-            if(temp >= 0.1f && temp <= 3.0f) {
-                mScaleFactor = temp;
-                mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 3.0f));
-
-                left = left - (fx / (picture.getWidth()*mScaleFactor))*dx;
-                top = top - (fy / (picture.getHeight()*mScaleFactor))*dy;
-
-                int[] dimens = getCropSquareDimens();
-                cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
-                invalidate();
+            if(picture.getWidth()*mScaleFactor*scale < cropSize ||
+                    picture.getHeight()*mScaleFactor*scale < cropSize) {
+                return true;
             }
+
+            mScaleFactor *= scale;
+            int[] dimens = getCropSquareDimens();
+            cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
+
+            left = left - (fx / (picture.getWidth()*mScaleFactor))*dx;
+            top = top - (fy / (picture.getHeight()*mScaleFactor))*dy;
+
+            if(left >= cropRect.left) {
+                left = cropRect.left;
+            }
+
+            if(top >= cropRect.top) {
+                top = cropRect.top;
+            }
+
+            if(left + picture.getWidth() <= cropRect.right) {
+                left += cropRect.right - (left + picture.getWidth());
+            }
+
+            if(top + picture.getHeight() <= cropRect.bottom) {
+                top += cropRect.bottom - (top + picture.getHeight());
+            }
+
+            invalidate();
 
             return true;
         }
 
-        @Override
+        /*@Override
         public void onScaleEnd(ScaleGestureDetector detector) {
             super.onScaleEnd(detector);
             float scaledWidth = picture.getWidth() * mScaleFactor;
@@ -211,7 +227,7 @@ public class ImageCropper extends View {
                     invalidate();
                 }
             }
-        }
+        }*/
 
     };
 

@@ -154,7 +154,6 @@ public class ImageCropper extends View {
             float dx = sw - picture.getWidth();
             float dy = sh - picture.getHeight();
 
-            Log.d("CROP", "sw: " + picture.getWidth()*mScaleFactor + ", sh: " + picture.getHeight()*mScaleFactor + ", crop: " + cropSize);
             if(picture.getWidth()*mScaleFactor*scale < cropSize ||
                     picture.getHeight()*mScaleFactor*scale < cropSize) {
                 return true;
@@ -188,7 +187,7 @@ public class ImageCropper extends View {
             return true;
         }
 
-        @Override
+        /*@Override
         public void onScaleEnd(ScaleGestureDetector detector) {
             super.onScaleEnd(detector);
             float scaledWidth = picture.getWidth() * mScaleFactor;
@@ -228,7 +227,7 @@ public class ImageCropper extends View {
                     invalidate();
                 }
             }
-        }
+        }*/
 
     };
 

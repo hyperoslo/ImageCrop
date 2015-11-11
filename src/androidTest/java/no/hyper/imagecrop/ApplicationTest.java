@@ -1,4 +1,4 @@
-package com.jeantuffier.imagecrop;
+package no.hyper.imagecrop;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

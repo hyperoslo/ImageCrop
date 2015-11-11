@@ -5,10 +5,10 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
     }
     buildTypes {
         release {
@@ -23,3 +23,27 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.0'
 }
+
+ext {
+    // Where you will see your artifact in Bintray's web interface
+    // The "bintrayName" should match the name of the Bintray repro.
+    bintrayRepo = 'maven'
+    bintrayName = 'image-crop'
+
+    // Maven metadata
+    publishedGroupId = 'no.hyper.imagecrop'
+    libraryName = 'Imagecrop'
+    // Save yourself a head ache, and set this equal to the name of the Android Studio library
+    // module. The artifact name needs to match the name of the library.
+    artifact = 'imagecrop'
+
+    libraryDescription = 'android library providing ui element for zooming, panning and cropping pictures.'
+    libraryVersion = '0.1'
+
+    developerId = 'jeantuffier'
+    developerName = 'Jean Tuffier'
+    developerEmail = 'jean@hyper.no'
+}
+
+apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/bintrayv1.gradle'

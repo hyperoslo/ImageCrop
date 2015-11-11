@@ -1,6 +1,9 @@
 # ImageCrop
 android library providing ui element for zooming, panning and cropping pictures.
 
+![screen example]
+(https://github.com/hyperoslo/ImageCrop/blob/master/images/one.jpg)
+
 # Gradle
 `compile 'no.hyper.imagecrop:imagecrop:0.1'`
 

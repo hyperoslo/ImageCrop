@@ -1,5 +1,8 @@
 # ImageCrop
-android library providing ui element for zooming, panning and cropping pictures.
+Android library providing a UI element for zooming, panning and cropping pictures.
+
+![screen example]
+(https://github.com/hyperoslo/ImageCrop/blob/master/images/one.jpg)
 
 # Gradle
 `compile 'no.hyper.imagecrop:imagecrop:0.1'`
@@ -15,20 +18,20 @@ Declare in XML
     android:layout_height="match_parent"
     android:background="#000000">
 
-  <no.hyper.imagecrop.ImageCropper
-          android:id="@+id/image_cropper"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          custom:crop_size="200"/>
+    <no.hyper.imagecrop.ImageCropper
+        android:id="@+id/image_cropper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:crop_size="200"/>
   
-  <no.hyper.imagecrop.Overlay
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      custom:crop_size="200"/>
+    <no.hyper.imagecrop.Overlay
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:crop_size="200"/>
       
 </FrameLayout>
 ```
-`crop_size` define in pixel the size of the square use to crop pictures.
+`crop_size` define in pixels the size of the square used to crop pictures. If not specified, 500 is the default value.
 
 To set the picture into the UI element:
 ```Java
@@ -48,7 +51,7 @@ To get the cropped picture:
 Bitmap cropped = imageCropper.getCroppedPicture();
 ```
 
-# Liscense
+# License
 ```
 The MIT License (MIT)
 

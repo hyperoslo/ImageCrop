@@ -1,5 +1,5 @@
 # ImageCrop
-android library providing ui element for zooming, panning and cropping pictures.
+Android library providing a UI element for zooming, panning and cropping pictures.
 
 ![screen example]
 (https://github.com/hyperoslo/ImageCrop/blob/master/images/one.jpg)

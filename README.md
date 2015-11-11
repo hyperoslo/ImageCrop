@@ -18,16 +18,16 @@ Declare in XML
     android:layout_height="match_parent"
     android:background="#000000">
 
-  <no.hyper.imagecrop.ImageCropper
-          android:id="@+id/image_cropper"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          custom:crop_size="200"/>
+    <no.hyper.imagecrop.ImageCropper
+        android:id="@+id/image_cropper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:crop_size="200"/>
   
-  <no.hyper.imagecrop.Overlay
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      custom:crop_size="200"/>
+    <no.hyper.imagecrop.Overlay
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:crop_size="200"/>
       
 </FrameLayout>
 ```

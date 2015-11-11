@@ -25,21 +25,13 @@ dependencies {
 }
 
 ext {
-    // Where you will see your artifact in Bintray's web interface
-    // The "bintrayName" should match the name of the Bintray repro.
     bintrayRepo = 'maven'
     bintrayName = 'image-crop'
-
-    // Maven metadata
     publishedGroupId = 'no.hyper.imagecrop'
     libraryName = 'Imagecrop'
-    // Save yourself a head ache, and set this equal to the name of the Android Studio library
-    // module. The artifact name needs to match the name of the library.
     artifact = 'imagecrop'
-
     libraryDescription = 'android library providing ui element for zooming, panning and cropping pictures.'
     libraryVersion = '0.1'
-
     developerId = 'jeantuffier'
     developerName = 'Jean Tuffier'
     developerEmail = 'jean@hyper.no'

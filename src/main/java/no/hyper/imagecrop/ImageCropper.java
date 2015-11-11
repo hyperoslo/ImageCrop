@@ -3,25 +3,16 @@ package no.hyper.imagecrop;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.media.ExifInterface;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-
-import no.hyper.imagecrop.R;
 
 /**
  * Created by jean on 07/10/15.
@@ -33,7 +24,6 @@ public class ImageCropper extends View {
     private Point middle;
     private Paint bitmapPaint;
     private Rect cropRect;
-    private String picturePath;
     private int screenWidth;
     private int screenHeight;
     private int cropSize;
@@ -66,8 +56,9 @@ public class ImageCropper extends View {
     private void init() {
         bitmapPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-        screenHeight = Utils.ScreenSize.getHeight(context);
-        screenWidth = Utils.ScreenSize.getWidth(context);
+        Point size = ImageCropperUtils.getSize(context);
+        screenWidth = size.x;
+        screenHeight = size.y;
 
         middle = new Point(screenWidth / 2, screenHeight / 2);
         int[] dimens = getCropSquareDimens();
@@ -102,27 +93,6 @@ public class ImageCropper extends View {
         boolean retVal = mScaleDetector.onTouchEvent(ev);
         retVal = mGestureDetector.onTouchEvent(ev) || retVal;
         return retVal || super.onTouchEvent(ev);
-    }
-
-    public Bitmap createSafeBitmap(String picturePath) {
-        this.picturePath = picturePath;
-        BitmapFactory.Options options = Utils.Image.getImageInfo(picturePath);
-        options.inJustDecodeBounds = false;
-        options.inSampleSize = calculateInSampleSize(options,
-                screenWidth, screenHeight);
-
-        Bitmap bitmap = BitmapFactory.decodeFile(picturePath, options);
-        if(bitmap != null) {
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), getRotationMatrix(), true);
-
-            float scaleFactor = (float)screenWidth / (float)bitmap.getWidth();
-            int newWidth = screenWidth;
-            int newHeight = Math.round(bitmap.getHeight() * scaleFactor);
-            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
-            return bitmap;
-        } else {
-            return null;
-        }
     }
 
     public Bitmap getCroppedPicture() {
@@ -273,53 +243,6 @@ public class ImageCropper extends View {
                 Math.round((middle.x + cropSize/2)/mScaleFactor),
                 Math.round((middle.y + cropSize/2)/mScaleFactor)
         };
-    }
-
-    private int getRotationValue() {
-        int rotate = 0;
-        try {
-            ExifInterface exif = new ExifInterface(picturePath);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return rotate;
-    }
-
-    private Matrix getRotationMatrix() {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(getRotationValue());
-        return matrix;
-    }
-
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth,
-                                             int reqHeight) {
-        int inSampleSize = 2;
-        int rotation = getRotationValue();
-        int width = options.outWidth;
-        int height = options.outHeight;
-        if(rotation == 90 || rotation == 270) {
-            width = options.outHeight;
-            height = options.outWidth;
-        }
-
-        while (width / inSampleSize > reqWidth ||  height / inSampleSize > reqHeight) {
-            inSampleSize *= 2;
-        }
-
-        return inSampleSize;
     }
 
 }

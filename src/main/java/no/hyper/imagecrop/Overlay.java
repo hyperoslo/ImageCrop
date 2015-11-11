@@ -64,8 +64,9 @@ public class Overlay extends View {
         cropRectPaint.setStyle(Paint.Style.STROKE);
         cropRectPaint.setColor(Color.WHITE);
 
-        screenHeight = Utils.ScreenSize.getHeight(context);
-        screenWidth = Utils.ScreenSize.getWidth(context);
+        Point size = ImageCropperUtils.getSize(context);
+        screenWidth = size.x;
+        screenHeight= size.y;
 
         middle = new Point(screenWidth / 2, screenHeight / 2);
 

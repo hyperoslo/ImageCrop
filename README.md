@@ -31,7 +31,7 @@ Declare in XML
       
 </FrameLayout>
 ```
-`crop_size` define in pixel the size of the square use to crop pictures.
+`crop_size` define in pixel the size of the square use to crop pictures. If not specified, 500 is the default value.
 
 To set the picture into the UI element:
 ```Java

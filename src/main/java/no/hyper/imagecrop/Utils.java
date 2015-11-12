@@ -13,10 +13,10 @@ import android.view.WindowManager;
 /**
  * Created by chang@hyper.no on 5/26/2015.
  */
-public class ImageCropperUtils {
+class Utils {
 
     public static Bitmap createSafeBitmap(Context context, String picturePath) {
-        Point size = ImageCropperUtils.getSize(context);
+        Point size = Utils.getSize(context);
         int screenWidth = size.x;
         int screenHeight = size.y;
 
@@ -35,7 +35,7 @@ public class ImageCropperUtils {
         }
     }
 
-    static Point getSize(Context context) {
+    public static Point getSize(Context context) {
         WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         Point size = new Point();

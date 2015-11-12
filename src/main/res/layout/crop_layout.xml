@@ -1,0 +1,17 @@
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <no.hyper.imagecrop.ImageTray
+        android:id="@+id/image_tray"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <no.hyper.imagecrop.Overlay
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</merge>

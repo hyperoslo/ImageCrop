@@ -16,7 +16,7 @@ import android.view.View;
 /**
  * Created by jean on 05/11/15.
  */
-public class Overlay extends View {
+class Overlay extends View {
 
     private Context context;
     private int cropSize;
@@ -34,7 +34,6 @@ public class Overlay extends View {
 
     public Overlay(Context context, AttributeSet attrs) {
         super(context, attrs);
-
         this.context = context;
 
         TypedArray array = context.getTheme().obtainStyledAttributes(
@@ -64,12 +63,16 @@ public class Overlay extends View {
         cropRectPaint.setStyle(Paint.Style.STROKE);
         cropRectPaint.setColor(Color.WHITE);
 
-        Point size = ImageCropperUtils.getSize(context);
+        Point size = Utils.getSize(context);
         screenWidth = size.x;
         screenHeight= size.y;
 
         middle = new Point(screenWidth / 2, screenHeight / 2);
 
+        createOverlay();
+    }
+
+    private void createOverlay() {
         while(screenWidth < cropSize || screenHeight < cropSize) {
             cropSize -= 50;
         }
@@ -82,6 +85,12 @@ public class Overlay extends View {
         Canvas canvas = new Canvas(overlay);
         canvas.drawRect(0, 0, screenWidth + 5, screenHeight + 5, overlayRectPaint);
         canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, maskPaint);
+    }
+
+    public void setCropSize(int size) {
+        cropSize = size;
+        createOverlay();
+        invalidate();
     }
 
     @Override

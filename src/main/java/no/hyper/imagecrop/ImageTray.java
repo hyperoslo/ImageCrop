@@ -154,49 +154,7 @@ class ImageTray extends View {
 
             return true;
         }
-
-        /*@Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            super.onScaleEnd(detector);
-            float scaledWidth = picture.getWidth() * mScaleFactor;
-            float scaledHeight = picture.getHeight() * mScaleFactor;
-
-            if(scaledWidth < cropSize || scaledHeight < cropSize) {
-
-                while (scaledWidth < cropSize || scaledHeight < cropSize) {
-                    mScaleFactor += 0.05f;
-                    scaledWidth = picture.getWidth() * mScaleFactor;
-                    scaledHeight = picture.getHeight() * mScaleFactor;
-                }
-
-                int[] dimens = getCropSquareDimens();
-                cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
-                left = (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
-                top = (middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
-                invalidate();
-            } else {
-                if(left > cropRect.left) {
-                    left = cropRect.left;
-                    invalidate();
-                }
-
-                if(top > cropRect.top) {
-                    top = cropRect.top;
-                    invalidate();
-                }
-
-                if(left + picture.getWidth() < cropRect.right) {
-                    left += cropRect.right - (left + picture.getWidth());
-                    invalidate();
-                }
-
-                if(top + picture.getHeight() < cropRect.bottom) {
-                    top += cropRect.bottom - (top + picture.getHeight());
-                    invalidate();
-                }
-            }
-        }*/
-
+        
     };
 
     private final GestureDetector.SimpleOnGestureListener mGestureListener

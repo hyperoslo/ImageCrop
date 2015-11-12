@@ -18,7 +18,7 @@ import android.view.View;
 class Overlay extends View {
 
     private Context context;
-    private int cropSize = 500;
+    private int cropSize = ImageCropper.DEFAULT_SIZE;
     private int screenHeight;
     private int screenWidth;
     private Point middle;

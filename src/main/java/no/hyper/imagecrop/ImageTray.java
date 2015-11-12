@@ -26,7 +26,7 @@ class ImageTray extends View {
     private Rect cropRect;
     private int screenWidth;
     private int screenHeight;
-    private int cropSize = 500;
+    private int cropSize = ImageCropper.DEFAULT_SIZE;
     private float left;
     private float top;
 
@@ -154,7 +154,7 @@ class ImageTray extends View {
 
             return true;
         }
-        
+
     };
 
     private final GestureDetector.SimpleOnGestureListener mGestureListener
@@ -171,11 +171,9 @@ class ImageTray extends View {
                 float newX = left - distanceX/mScaleFactor;
                 float newY = top - distanceY/mScaleFactor;
 
-                float minX = (middle.x + cropSize /2)/mScaleFactor
-                        - picture.getWidth();
+                float minX = (middle.x + cropSize /2)/mScaleFactor - picture.getWidth();
                 float maxX = (middle.x - cropSize /2)/mScaleFactor;
-                float minY = (middle.y + cropSize/2)/mScaleFactor
-                        - picture.getHeight();
+                float minY = (middle.y + cropSize/2)/mScaleFactor - picture.getHeight();
                 float maxY = (middle.y - cropSize/2)/mScaleFactor;
 
                 if(newX > minX && newX < maxX) {

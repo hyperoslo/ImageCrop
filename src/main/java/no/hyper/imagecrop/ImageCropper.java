@@ -11,6 +11,8 @@ import android.widget.FrameLayout;
  */
 public class ImageCropper extends FrameLayout {
 
+    public final static int DEFAULT_SIZE = 500;
+
     private Context context;
     private int cropSize;
     private ImageTray imageTray;
@@ -27,7 +29,7 @@ public class ImageCropper extends FrameLayout {
                 attrs, R.styleable.ImageCropper, 0, 0);
 
         try {
-            cropSize = array.getInt(R.styleable.ImageCropper_crop_size, 500);
+            cropSize = array.getInt(R.styleable.ImageCropper_crop_size, DEFAULT_SIZE);
         } finally {
             array.recycle();
         }
@@ -35,10 +37,11 @@ public class ImageCropper extends FrameLayout {
         inflate(context, R.layout.crop_layout, this);
 
         Overlay overlay = (Overlay) findViewById(R.id.overlay);
-        overlay.setCropSize(cropSize);
-
         imageTray = (ImageTray) findViewById(R.id.image_tray);
-        imageTray.setCropSize(cropSize);
+        if(cropSize != DEFAULT_SIZE) {
+            overlay.setCropSize(cropSize);
+            imageTray.setCropSize(cropSize);
+        }
     }
 
     public boolean setPicture(String path) {

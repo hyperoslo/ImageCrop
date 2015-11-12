@@ -5,46 +5,30 @@ Android library providing a UI element for zooming, panning and cropping picture
 (https://github.com/hyperoslo/ImageCrop/blob/master/images/one.jpg)
 
 # Gradle
-`compile 'no.hyper.imagecrop:imagecrop:0.1'`
+`compile 'no.hyper.imagecrop:imagecrop:0.3'`
 
 # Usage
 Declare in XML
 
 ```xml
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
+<no.hyper.imagecrop.ImageCropper
+    android:id="@+id/image_cropper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
-
-    <no.hyper.imagecrop.ImageCropper
-        android:id="@+id/image_cropper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        custom:crop_size="200"/>
-  
-    <no.hyper.imagecrop.Overlay
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        custom:crop_size="200"/>
-      
-</FrameLayout>
+    custom:crop_size="200"/>
 ```
 `crop_size` define in pixels the size of the square used to crop pictures. If not specified, 500 is the default value.
 
 To set the picture into the UI element:
 ```Java
-ImageCropper imageCropper = (ImageCropper) findViewById(R.id.image_cropper);
-Bitmap bitmap = imageCropper.createSafeBitmap(imagePath);
-if(bitmap != null) {
-    imageCropper.setPicture(bitmap);
-} else {
+imageCropper = (ImageCropper) findViewById(R.id.image_cropper);
+boolean isSet = imageCropper.setPicture(imagePath);
+if(!isSet) {
     Toast.makeText(getApplicationContext(), "bitmap == null", Toast.LENGTH_LONG).show();
     finish();
 }
 ```
-`createSafeBitmap(String path)` allows you to get a scaled down bitmap fitting the screen size and managing OutOfMemory exceptions.  
+`setPicture(String path)` takes care of pictures size and manage to avoid OutOfMemory exceptions for you.
 
 To get the cropped picture:
 ```Java

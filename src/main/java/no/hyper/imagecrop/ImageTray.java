@@ -200,4 +200,3 @@ class ImageTray extends View {
     }
 
 }
-

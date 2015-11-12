@@ -1,7 +1,6 @@
 package no.hyper.imagecrop;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,7 +18,7 @@ import android.view.View;
 class Overlay extends View {
 
     private Context context;
-    private int cropSize;
+    private int cropSize = 500;
     private int screenHeight;
     private int screenWidth;
     private Point middle;
@@ -35,16 +34,6 @@ class Overlay extends View {
     public Overlay(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-
-        TypedArray array = context.getTheme().obtainStyledAttributes(
-                attrs, R.styleable.ImageCropper, 0, 0);
-
-        try {
-            cropSize = array.getInt(R.styleable.ImageCropper_crop_size, 500);
-        } finally {
-            array.recycle();
-        }
-
         init();
     }
 

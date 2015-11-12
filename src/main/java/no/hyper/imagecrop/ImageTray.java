@@ -1,7 +1,6 @@
 package no.hyper.imagecrop;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -27,7 +26,7 @@ class ImageTray extends View {
     private Rect cropRect;
     private int screenWidth;
     private int screenHeight;
-    private int cropSize;
+    private int cropSize = 500;
     private float left;
     private float top;
 
@@ -42,15 +41,6 @@ class ImageTray extends View {
 
         mScaleDetector = new ScaleGestureDetector(context, mScaleGestureListener);
         mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
-
-        TypedArray array = context.getTheme().obtainStyledAttributes(
-                attrs, R.styleable.ImageCropper, 0, 0);
-
-        try {
-            cropSize = array.getInt(R.styleable.ImageCropper_crop_size, 500);
-        } finally {
-            array.recycle();
-        }
 
         init();
     }

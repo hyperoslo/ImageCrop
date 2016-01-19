@@ -1,0 +1,74 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <no.hyper.imagecrop.ImageCropper
+        android:id="@+id/image_cropper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:crop_size="600"/>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_action_bar_default_height_material"
+        android:textColor="@android:color/white"
+        android:background="#333333"
+        android:gravity="center"
+        android:layout_gravity="top"
+        android:text="Move and scale"
+        android:textSize="18sp"
+        android:textAllCaps="true"/>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/bottomPanel"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:background="#000000">
+
+        <Button
+            android:id="@+id/cancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:background="#333333"
+            android:textColor="@android:color/white"
+            android:text="Cancel"/>
+
+        <View
+            android:layout_width="2px"
+            android:layout_height="match_parent"
+            android:background="#666666"/>
+
+        <Button
+            android:id="@+id/finish"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="Finish"
+            android:textColor="@android:color/white"
+            android:background="#333333"/>
+
+    </LinearLayout>
+
+</FrameLayout>

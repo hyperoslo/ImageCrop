@@ -97,8 +97,18 @@ class ImageTray extends View {
         int y = Math.round(cropRect.top) - Math.round(top);
 
         Log.d("CROP", "rect: " + Math.round(cropRect.left) + ", left: " + Math.round(left));
+
+        //** to prevent illegal state exception */
+        int croppedSize = Math.round(cropSize / mScaleFactor);
+        if (x + croppedSize > picture.getWidth()) {
+            x = picture.getWidth() - croppedSize;
+        }
+        if (y + croppedSize > picture.getHeight()) {
+            y = picture.getHeight() - croppedSize;
+        }
+
         Bitmap newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0,
-                Math.round(cropSize / mScaleFactor), Math.round(cropSize / mScaleFactor));
+                croppedSize, croppedSize);
 
         return Bitmap.createScaledBitmap(newBitmap, Math.round(cropSize),
                 Math.round(cropSize), true);

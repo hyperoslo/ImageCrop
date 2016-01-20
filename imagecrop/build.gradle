@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 3
-        versionName "0.3"
+        versionCode 4
+        versionName "0.3.1"
     }
     buildTypes {
         release {
@@ -26,15 +26,22 @@ dependencies {
 
 ext {
     bintrayRepo = 'maven'
-    bintrayName = 'image-crop'
-    publishedGroupId = 'no.hyper.imagecrop'
-    libraryName = 'Imagecrop'
+    bintrayName = 'ImageCrop'
+
+    publishedGroupId = 'no.hyper'
+    libraryName = 'ImageCrop'
     artifact = 'imagecrop'
+
     libraryDescription = 'android library providing ui element for zooming, panning and cropping pictures.'
-    libraryVersion = '0.3'
-    developerId = 'jeantuffier'
+    libraryVersion = '0.3.1'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+
+    developerId = 'hyper-oslo'
     developerName = 'Jean Tuffier'
-    developerEmail = 'jean@hyper.no'
+    developerEmail = 'android@hyper.no'
 }
 
 apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'

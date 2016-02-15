@@ -107,6 +107,8 @@ class ImageTray extends View {
             y = picture.getHeight() - croppedSize;
         }
 
+        System.gc();
+
         Bitmap newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0,
                 croppedSize, croppedSize);
 

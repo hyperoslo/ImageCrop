@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 5
-        versionName "0.3.2"
+        versionCode 6
+        versionName "0.3.3"
     }
     buildTypes {
         release {
@@ -33,7 +33,7 @@ ext {
     artifact = 'imagecrop'
 
     libraryDescription = 'android library providing ui element for zooming, panning and cropping pictures.'
-    libraryVersion = '0.3.2'
+    libraryVersion = '0.3.3'
 
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'

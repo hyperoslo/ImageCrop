@@ -2,6 +2,4 @@
 *.iml
 .gradle/
 .idea/
-app/app.iml
-imagecrop/imagecrop.iml
 local.properties

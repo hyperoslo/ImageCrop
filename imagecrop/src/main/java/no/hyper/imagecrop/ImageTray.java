@@ -62,8 +62,8 @@ class ImageTray extends View {
         }
 
         this.picture = picture;
-        left = 0;// (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
-        top = 0;//(middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
+        left = (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
+        top = (middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
 
         invalidate();
     }

@@ -3,3 +3,7 @@
 .gradle/
 .idea/
 local.properties
+app/app.iml
+imagecrop/imagecrop.iml
+gradlew
+gradlew.bat

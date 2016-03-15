@@ -14,9 +14,6 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-/**
- * Created by jean on 07/10/15.
- */
 class ImageTray extends View {
 
     private Context context;
@@ -65,8 +62,8 @@ class ImageTray extends View {
         }
 
         this.picture = picture;
-        left = (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
-        top = (middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
+        left = 0;// (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
+        top = 0;//(middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
 
         invalidate();
     }
@@ -108,12 +105,15 @@ class ImageTray extends View {
         }
 
         System.gc();
+        Bitmap newBitmap;
+        if (mScaleFactor == 1.0) {
+            newBitmap =  Bitmap.createBitmap(picture, (middle.x - cropSize/2) - Math.round(left),
+                    (middle.y - cropSize/2) - Math.round(top), croppedSize, croppedSize);
+        } else {
+            newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0, croppedSize, croppedSize);
+        }
 
-        Bitmap newBitmap = Bitmap.createBitmap(picture, (x > 0) ? x : 0, (y > 0) ? y : 0,
-                croppedSize, croppedSize);
-
-        return Bitmap.createScaledBitmap(newBitmap, Math.round(cropSize),
-                Math.round(cropSize), true);
+        return Bitmap.createScaledBitmap(newBitmap, Math.round(cropSize), Math.round(cropSize), true);
     }
 
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener

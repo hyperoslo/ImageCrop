@@ -51,14 +51,7 @@ class Overlay extends View {
         cropRectPaint = new Paint();
         cropRectPaint.setStyle(Paint.Style.STROKE);
         cropRectPaint.setColor(Color.WHITE);
-
-        Point size = Utils.getSize(context);
-        screenWidth = size.x;
-        screenHeight= size.y;
-
-        middle = new Point(screenWidth / 2, screenHeight / 2);
-
-        createOverlay();
+        middle = new Point();
     }
 
     private void createOverlay() {
@@ -81,6 +74,18 @@ class Overlay extends View {
         createOverlay();
         invalidate();
     }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        screenHeight = getMeasuredHeight();
+        screenWidth = getMeasuredWidth();
+        middle.set(screenWidth / 2, screenHeight / 2);
+
+        createOverlay();
+    }
+
+
 
     @Override
     protected void onDraw(Canvas canvas) {

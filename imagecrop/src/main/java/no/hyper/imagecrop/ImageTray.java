@@ -39,33 +39,40 @@ class ImageTray extends View {
         mScaleDetector = new ScaleGestureDetector(context, mScaleGestureListener);
         mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
 
-        init();
-    }
-
-    private void init() {
         bitmapPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-        Point size = Utils.getSize(context);
-        screenWidth = size.x;
-        screenHeight = size.y;
+        middle = new Point();
+        cropRect = new Rect();
+    }
 
-        middle = new Point(screenWidth / 2, screenHeight / 2);
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        screenHeight = getMeasuredHeight();
+        screenWidth = getMeasuredWidth();
+        middle.set(screenWidth / 2, screenHeight / 2);
+
         int[] dimens = getCropSquareDimens();
-        cropRect = new Rect(dimens[0], dimens[1], dimens[2], dimens[3]);
+        cropRect.set(dimens[0], dimens[1], dimens[2], dimens[3]);
+
+        calculatePicturePos(picture);
     }
 
     public void setPicture(Bitmap picture) {
+        this.picture = picture;
+    }
+
+    private void calculatePicturePos(Bitmap picture) {
         mScaleFactor = 1f;
         while(picture.getWidth()*mScaleFactor < cropSize ||
                 picture.getHeight()*mScaleFactor < cropSize) {
             mScaleFactor += 0.1;
         }
 
-        this.picture = picture;
+
         left = (middle.x - (picture.getWidth()*mScaleFactor)/2)/mScaleFactor;
         top = (middle.y - (picture.getHeight()*mScaleFactor)/2)/mScaleFactor;
-
-        invalidate();
     }
 
     public void setCropSize(int size) {

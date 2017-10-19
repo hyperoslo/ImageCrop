@@ -12,10 +12,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-/**
- * Created by jean on 05/11/15.
- */
-class Overlay extends View {
+public class Overlay extends View {
 
     private Context context;
     private int cropSize = ImageCropper.DEFAULT_SIZE;

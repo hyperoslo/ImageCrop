@@ -14,7 +14,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-class ImageTray extends View {
+public class ImageTray extends View {
 
     private Context context;
     private Bitmap picture;

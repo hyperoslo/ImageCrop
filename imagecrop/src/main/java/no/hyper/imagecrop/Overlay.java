@@ -39,7 +39,7 @@ class Overlay extends View {
 
     private void init() {
         bitmapOverlayPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-        bitmapOverlayPaint.setAlpha(180);
+        bitmapOverlayPaint.setAlpha(120);
 
         maskPaint = new Paint();
         maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));

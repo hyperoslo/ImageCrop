@@ -39,7 +39,7 @@ class Overlay extends View {
 
     private void init() {
         bitmapOverlayPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-        bitmapOverlayPaint.setAlpha(120);
+        bitmapOverlayPaint.setAlpha(180);
 
         maskPaint = new Paint();
         maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -66,7 +66,12 @@ class Overlay extends View {
                 screenHeight + 5, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(overlay);
         canvas.drawRect(0, 0, screenWidth + 5, screenHeight + 5, overlayRectPaint);
-        canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, maskPaint);
+        canvas.drawCircle(
+                (cropRect.left + cropRect.right) / 2,
+                (cropRect.top + cropRect.bottom) / 2,
+                (cropRect.right - cropRect.left) / 2,
+                maskPaint
+        );
     }
 
     public void setCropSize(int size) {
@@ -92,7 +97,12 @@ class Overlay extends View {
         super.onDraw(canvas);
         canvas.save();
         canvas.drawBitmap(overlay, 0, 0, bitmapOverlayPaint);
-        canvas.drawRect(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom, cropRectPaint);
+        canvas.drawCircle(
+                (cropRect.left + cropRect.right) / 2,
+                (cropRect.top + cropRect.bottom) / 2,
+                (cropRect.right - cropRect.left) / 2,
+                cropRectPaint
+        );
         canvas.restore();
     }
 }
